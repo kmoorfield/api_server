@@ -1,0 +1,69 @@
+# Use admin/admin user/password credentials - https://hub.docker.com/_/postgres
+# When using adminer to log in use the hostname postgres instead of localhost:5432
+# To use docker compose use the below commands:
+# docker compose -f <file_name>.yaml up -d 
+# docker compose -f <file_name> down
+# up command can be used to restart / reconfigure / rebuild containers
+version: '3.1'
+
+services:
+  api:
+    build: .
+    image: local/webapi
+    container_name: web_api
+    hostname: webapi
+    restart: always
+    ports:
+      - 5000:80
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      DB_CONNECTION_STRING: "Host=postgres;Port=5432;Database=test;Username=admin;Password=admin"
+    links:
+      - postgres
+    depends_on:
+      - db_migrations
+
+  db:
+    image: postgres:latest
+    container_name: pg_database
+    hostname: postgres
+    restart: always
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: test
+      PGDATA: /var/lib/postgresql/data/pgdata
+      POSTGRES_PORT: 5432
+
+  db_migrations:
+    build: flyway
+    image: local/flyway
+    container_name: flyway
+    hostname: flyway
+    command: -url=jdbc:postgresql://postgres:5432/test -schemas=public -user=admin -password=admin -connectRetries=60 migrate
+    links:
+      - postgres
+    depends_on:
+      - db
+
+  api_tests:
+    build: pytests
+    image: local/pytests
+    container_name: pytests
+    hostname: pytests
+    links:
+      - api
+    depends_on:
+      - api
+
+  adminer:
+    image: adminer:latest
+    container_name: db_login
+    hostname: adminer
+    restart: always
+    ports:
+      - 8080:8080
+    links:
+      - postgres
