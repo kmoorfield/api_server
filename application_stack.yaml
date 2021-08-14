@@ -58,9 +58,11 @@ services:
     depends_on:
       - api
 
-  load_tests:
-    build: locust
-    image: local/locust
+  load_main:
+    build: 
+        context: ./locust
+        dockerfile: Dockerfile_Main
+    image: local/locust_main
     container_name: locust
     hostname: locust
     ports:
@@ -69,6 +71,17 @@ services:
       - api
     depends_on:
       - pytests
+
+  load_worker:
+    build: 
+        context: ./locust
+        dockerfile: Dockerfile_Worker
+    image: local/locust_worker
+    links:
+      - api
+    depends_on:
+      - pytests
+      - load_main
 
   adminer:
     image: adminer:latest
