@@ -67,8 +67,6 @@ services:
     hostname: locust
     ports:
       - 8089:8089
-    volumes:
-      - ./:/mnt/locust
     links:
       - api
     depends_on:
@@ -79,8 +77,6 @@ services:
         context: ./locust
         dockerfile: Dockerfile_Worker
     image: local/locust_worker
-    volumes:
-      - ./:/mnt/locust
     links:
       - api
     depends_on:
