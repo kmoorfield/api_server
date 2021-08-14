@@ -1,4 +1,5 @@
 import time
+import json
 from locust import HttpUser, task, between
 
 class TestLoadClass(HttpUser):
@@ -28,7 +29,8 @@ class TestLoadClass(HttpUser):
     def post_record(self):
         created_record = self.client.post("/insert", json={"id": 0, "fact":"This is a new fact!"})
         time.sleep(1)
-        self.client.delete(f"/delete/{created_record.id}")
+        id = created_record.json()["id"]
+        self.client.delete(f"/delete/{id}")
         time.sleep(1)
 
     @task
