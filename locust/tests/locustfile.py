@@ -26,16 +26,12 @@ class TestLoadClass(HttpUser):
 
     @task
     def post_record(self):
-        self.client.post("/insert", json={"id": 0, "fact":"This is a new fact!"})
+        created_record = self.client.post("/insert", json={"id": 0, "fact":"This is a new fact!"})
+        time.sleep(1)
+        self.client.delete(f"/delete/{created_record.id}")
         time.sleep(1)
 
     @task
     def put_update_record(self):
         self.client.put("/update/50", json={"id": 50, "fact":"This is an updated fact!"})
         time.sleep(1)
-
-    @task
-    def delete_random_record(self):
-        for item_id in range(2, 10):
-            self.client.delete(f"/delete/{item_id}")
-            time.sleep(1)
