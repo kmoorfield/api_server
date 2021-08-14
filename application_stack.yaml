@@ -58,6 +58,18 @@ services:
     depends_on:
       - api
 
+  load_tests:
+    build: locust
+    image: local/locust
+    container_name: locust
+    hostname: locust
+    ports:
+      - 8089:8089
+    links:
+      - api
+    depends_on:
+      - pytests
+
   adminer:
     image: adminer:latest
     container_name: db_login

@@ -1,6 +1,6 @@
-FROM python:3-alpine
+FROM locustio/locust
 WORKDIR /tests
 COPY tests/requirements.txt /tests/
 COPY /tests/*.py /tests/
 RUN pip3 install --no-cache --upgrade pip -r /tests/requirements.txt
-ENTRYPOINT ["pytest", "/tests"]
+ENTRYPOINT ["locust", "--locustfile", "/tests/locustfile.py", "--web-port", "8089"]
