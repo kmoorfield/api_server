@@ -62,12 +62,12 @@ namespace C__api_server.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         public ActionResult<Dog> GetRandomRecord()
         {
-            int random_number = new Random().Next(1, _dogFactsContext.Dogs.Count());
-
             // We loop on the get until we get a non-null result.
             // This fixes race condition where the ID of the random number has been deleted or was skipped in the PostgreSQL sequence.
             while(true)
             {
+                int random_number = new Random().Next(1, _dogFactsContext.Dogs.Count());
+
                 var result = _dogFactsContext.Dogs.Skip(random_number).FirstOrDefault();
 
                 if(result is null)
