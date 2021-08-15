@@ -1,4 +1,5 @@
 import time
+from datetime import datetime, timezone
 import json
 from locust import HttpUser, task, between
 
@@ -35,5 +36,16 @@ class TestLoadClass(HttpUser):
 
     @task
     def put_update_record(self):
-        self.client.put("/update/50", json={"id": 50, "fact":"This is an updated fact!"})
+        random_record = self.client.get("/random")
+        id = random_record.json()["id"]
+        datetime_string = datetime.now(timezone.utc).strftime("%d/%m/%Y %H:%M:%S")
+        response = self.client.put(f"/update/{id}", json={"id": id, "fact": f"This is an updated fact! Updated at {datetime_string}"}, catch_response=True)
+
+        if response.status_code == 404:
+            response.success()
+        elif response.status_code == 200:
+            response.success()
+        else:
+            response.failure(response.content)
+
         time.sleep(1)
