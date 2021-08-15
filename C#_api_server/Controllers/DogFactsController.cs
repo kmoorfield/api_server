@@ -64,6 +64,8 @@ namespace C__api_server.Controllers
         {
             int random_number = new Random().Next(1, _dogFactsContext.Dogs.Count());
 
+            // We loop on the get until we get a non-null result.
+            // This fixes race condition where the ID of the random number has been deleted or was skipped in the PostgreSQL sequence.
             while(true)
             {
                 var result = _dogFactsContext.Dogs.Skip(random_number).FirstOrDefault();
