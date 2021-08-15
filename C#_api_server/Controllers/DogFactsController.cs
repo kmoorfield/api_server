@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 
 namespace C__api_server.Controllers
 {
@@ -63,8 +64,17 @@ namespace C__api_server.Controllers
         {
             int random_number = new Random().Next(1, _dogFactsContext.Dogs.Count());
 
-            var result = _dogFactsContext.Dogs.Skip(random_number).FirstOrDefault();
-            return Ok(result);    
+            while(true)
+            {
+                var result = _dogFactsContext.Dogs.Skip(random_number).FirstOrDefault();
+
+                if(result is null)
+                {
+                    continue;
+                }
+
+                return Ok(result);
+            }
         }
 
         /// <summary>
@@ -161,7 +171,20 @@ namespace C__api_server.Controllers
             }
 
             result.Fact = dog.Fact;
-            _dogFactsContext.SaveChanges();
+
+            // Add catch for if other changes have already been made to the record
+            try
+            {
+                _dogFactsContext.SaveChanges();
+            }
+            catch(DbUpdateConcurrencyException)
+            {
+                return Problem("The record you attempted to update was modified by another user before you.");
+            }
+            catch(Exception ex)
+            {
+                return Problem($@"Error encountered updating database. This might be transient, so please try again later. {ex.Message}");
+            }
 
             return Ok(result);
         }
